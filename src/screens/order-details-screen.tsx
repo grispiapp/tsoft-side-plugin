@@ -1,36 +1,26 @@
 "use client"
 
 import React from "react"
-import { DotsVerticalIcon, ExternalLinkIcon } from '@radix-ui/react-icons'
-import { Button } from "@/components/ui/button"
+import { ExternalLinkIcon } from '@radix-ui/react-icons'
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Screen, ScreenHeader, ScreenTitle, ScreenContent, LoadingWrapper } from "@/components/ui/screen"
-import { useStore } from "@/contexts/store-context"
-import { Order, getOrderDetailsUrl } from "@/api/tsoft"
-import { formatCurrency, formatDate, formatTimestamp } from "@/lib/utils"
+import { Screen, ScreenHeader, ScreenTitle, ScreenContent } from "@/components/ui/screen"
+import { getOrderDetailsUrl, Order } from "@/api/tsoft"
+import { cn, formatCurrency, formatDate, formatTimestamp } from "@/lib/utils"
+import { useNavigation } from "@/hooks/use-navigation"
 
 export const OrderDetailsScreen: React.FC = () => {
-    const { screenParams, setScreen } = useStore().screen;
+    const { screenParams, navigateBackToCustomerDetails } = useNavigation();
 
     const order = screenParams?.order as Order;
-    const tSoftSiteUrl = screenParams?.tSoftSiteUrl as string;
-
-    const handleBack = () => {
-        setScreen("customer-details", {
-            customer: screenParams?.customer,
-            preserveOrders: true,
-            previousOrdersState: screenParams?.previousOrdersState
-        });
-    }
+    const tSoftSiteUrl = screenParams?.tSoftSiteUrl as string | undefined;
 
     // Calculate subtotal
     const calculateSubtotal = () => {
         if (!order?.OrderDetails) return "0";
 
-        return order.OrderDetails.reduce((sum, item) => {
+        return order.OrderDetails.reduce((sum: number, item: any) => {
             const price = parseFloat(item.SellingPrice) || 0;
             const quantity = parseInt(item.Quantity) || 0;
             return sum + (price * quantity);
@@ -40,12 +30,12 @@ export const OrderDetailsScreen: React.FC = () => {
     if (!order) {
         return (
             <Screen>
-                <ScreenHeader onBack={handleBack}>
-                    <ScreenTitle>Order Details</ScreenTitle>
+                <ScreenHeader onBack={navigateBackToCustomerDetails}>
+                    <ScreenTitle>Sipariş Detayları</ScreenTitle>
                 </ScreenHeader>
                 <ScreenContent className="mt-2">
                     <div className="p-4 text-center text-muted-foreground">
-                        Order information not available
+                        Sipariş bilgileri mevcut değil
                     </div>
                 </ScreenContent>
             </Screen>
@@ -54,45 +44,30 @@ export const OrderDetailsScreen: React.FC = () => {
 
     return (
         <Screen>
-            <ScreenHeader onBack={handleBack}>
-                <ScreenTitle>Order Details</ScreenTitle>
+            <ScreenHeader onBack={navigateBackToCustomerDetails}>
+                <ScreenTitle>Sipariş Detayları</ScreenTitle>
             </ScreenHeader>
             <ScreenContent className="mt-2">
                 <Card className="mb-3 rounded-none border-0">
                     <CardContent className="p-3">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <div className="flex gap-2 items-center">
-                                    <h2 className="text-base font-medium">{order.OrderCode}</h2>
-                                    <Badge variant="secondary">{order.OrderStatus}</Badge>
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                    Created {formatDate(order.OrderDate)}
-                                </p>
-                            </div>
-                            {tSoftSiteUrl && (
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="w-8 h-8">
-                                            <DotsVerticalIcon className="size-4" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem asChild>
-                                            <a
-                                                href={getOrderDetailsUrl(tSoftSiteUrl, order.OrderId)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex gap-2 items-center"
-                                            >
-                                                <span>View in TSoft</span>
-                                                <ExternalLinkIcon className="size-3.5" />
-                                            </a>
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            )}
+                        <div className="flex gap-2 items-center">
+                            <h2 className="text-base font-medium">{order.OrderCode}</h2>
+                            <Badge variant="secondary">{order.OrderStatus}</Badge>
                         </div>
+                        <p className="text-sm text-muted-foreground">
+                            Oluşturulma {formatDate(order.OrderDate)}
+                        </p>
+                        {tSoftSiteUrl && (
+                            <a
+                                href={getOrderDetailsUrl(tSoftSiteUrl, order.OrderId)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex gap-1 items-center mt-2 text-sm text-muted-foreground/70 hover:text-muted-foreground"
+                            >
+                                <span>TSoft'ta Görüntüle</span>
+                                <ExternalLinkIcon className="size-3.5" />
+                            </a>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -101,24 +76,24 @@ export const OrderDetailsScreen: React.FC = () => {
                         <Tabs defaultValue="details" className="w-full">
                             <TabsList className="grid grid-cols-2 w-full h-9 rounded-none">
                                 <TabsTrigger value="details" className="text-xs">
-                                    Order Details
+                                    Sipariş Detayları
                                 </TabsTrigger>
                                 <TabsTrigger value="customer" className="text-xs">
-                                    Customer Info
+                                    Müşteri Bilgileri
                                 </TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="details" className="p-3 space-y-4 text-xs">
                                 {/* Order Items */}
                                 <div className="space-y-1">
-                                    <h3 className="mb-2 font-medium">Order Items</h3>
+                                    <h3 className="mb-2 font-medium">Ürünler</h3>
                                     {order.OrderDetails && order.OrderDetails.map((item) => (
                                         <Card key={item.OrderProductId} className="p-2">
                                             <div className="flex justify-between">
                                                 <div className="flex-1">
                                                     <div className="font-medium">{item.ProductName}</div>
                                                     <div className="text-xs text-muted-foreground">
-                                                        Code: {item.ProductCode}
+                                                        Kod: {item.ProductCode}
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
@@ -135,16 +110,16 @@ export const OrderDetailsScreen: React.FC = () => {
                                 {/* Shipping Info */}
                                 {order.ShipmentDetail && order.ShipmentDetail.length > 0 && (
                                     <div className="space-y-1">
-                                        <h3 className="mb-2 font-medium">Shipping Information</h3>
+                                        <h3 className="mb-2 font-medium">Kargo Bilgileri</h3>
                                         <Card className="p-2">
                                             <div className="grid grid-cols-2 gap-2">
                                                 <div>
-                                                    <div className="text-muted-foreground">Carrier:</div>
-                                                    <div>{order.ShipmentDetail[0]?.CargoCompany || order.Cargo || "Not specified"}</div>
+                                                    <div className="text-muted-foreground">Kargo Firması:</div>
+                                                    <div>{order.ShipmentDetail[0]?.CargoCompany || order.Cargo || "Belirtilmemiş"}</div>
                                                 </div>
                                                 <div>
-                                                    <div className="text-muted-foreground">Tracking Number:</div>
-                                                    <div className="truncate">{order.ShipmentDetail[0]?.CargoTrackingNo || "Not available"}</div>
+                                                    <div className="text-muted-foreground">Takip Numarası:</div>
+                                                    <div className="truncate">{order.ShipmentDetail[0]?.CargoTrackingNo || "Mevcut değil"}</div>
                                                 </div>
                                                 {order.ShipmentDetail[0]?.CargoTrackingUrl && (
                                                     <div className="col-span-2">
@@ -154,7 +129,7 @@ export const OrderDetailsScreen: React.FC = () => {
                                                             rel="noopener noreferrer"
                                                             className="flex gap-1 items-center text-xs text-primary"
                                                         >
-                                                            <span>Track Package</span>
+                                                            <span>Kargo Takip</span>
                                                             <ExternalLinkIcon className="size-3" />
                                                         </a>
                                                     </div>
@@ -166,25 +141,25 @@ export const OrderDetailsScreen: React.FC = () => {
 
                                 {/* Payment Details */}
                                 <div className="space-y-1">
-                                    <h3 className="mb-2 font-medium">Payment Details</h3>
+                                    <h3 className="mb-2 font-medium">Ödeme Detayları</h3>
                                     <Card className="p-2">
                                         <div className="space-y-1.5">
                                             <div className="flex justify-between">
-                                                <span>Payment Method:</span>
-                                                <span>{order.PaymentType || order.PaymentData?.Name || "Not specified"}</span>
+                                                <span>Ödeme Yöntemi:</span>
+                                                <span>{order.PaymentType || order.PaymentData?.Name || "Belirtilmemiş"}</span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span>Subtotal:</span>
+                                                <span>Ara Toplam:</span>
                                                 <span>{formatCurrency(order.OrderSubtotal || calculateSubtotal())}</span>
                                             </div>
                                             {(order.DiscountTotal && parseFloat(order.DiscountTotal) > 0) && (
                                                 <div className="flex justify-between">
-                                                    <span>Discount:</span>
+                                                    <span>İndirim:</span>
                                                     <span>-{formatCurrency(order.DiscountTotal)}</span>
                                                 </div>
                                             )}
                                             <div className="flex justify-between pt-1 font-medium border-t">
-                                                <span>Total:</span>
+                                                <span>Toplam:</span>
                                                 <span>{formatCurrency(order.OrderTotalPrice)}</span>
                                             </div>
                                         </div>
@@ -193,13 +168,13 @@ export const OrderDetailsScreen: React.FC = () => {
 
                                 {/* Order Timeline */}
                                 <div className="space-y-1">
-                                    <h3 className="mb-2 font-medium">Order Timeline</h3>
+                                    <h3 className="mb-2 font-medium">Zaman Çizelgesi</h3>
                                     <Card className="p-2">
                                         <div className="space-y-2">
                                             <div className="flex justify-between">
                                                 <div className="flex gap-2 items-center">
                                                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                                    <span>Order Placed</span>
+                                                    <span>Sipariş Verildi</span>
                                                 </div>
                                                 <div className="text-muted-foreground">
                                                     {formatDate(order.OrderDate)}
@@ -207,10 +182,10 @@ export const OrderDetailsScreen: React.FC = () => {
                                             </div>
 
                                             {order.ShipmentTime && (
-                                                <div className="flex justify-between">
+                                                <div className={cn("flex justify-between", { "opacity-50": order.ShipmentTime === '0' })}>
                                                     <div className="flex gap-2 items-center">
                                                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                                        <span>Shipped</span>
+                                                        <span>Kargoya Verildi</span>
                                                     </div>
                                                     <div className="text-muted-foreground">
                                                         {formatTimestamp(order.ShipmentTime)}
@@ -219,10 +194,10 @@ export const OrderDetailsScreen: React.FC = () => {
                                             )}
 
                                             {order.ShipmentDeliveryTime && (
-                                                <div className="flex justify-between">
+                                                <div className={cn("flex justify-between", { "opacity-50": order.ShipmentDeliveryTime === '0' })}>
                                                     <div className="flex gap-2 items-center">
                                                         <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                                        <span>Delivered</span>
+                                                        <span>Teslim Edildi</span>
                                                     </div>
                                                     <div className="text-muted-foreground">
                                                         {formatTimestamp(order.ShipmentDeliveryTime)}
@@ -237,7 +212,7 @@ export const OrderDetailsScreen: React.FC = () => {
                             <TabsContent value="customer" className="p-3 space-y-4 text-xs">
                                 {/* Customer Information */}
                                 <div className="space-y-1">
-                                    <h3 className="mb-2 font-medium">Customer Information</h3>
+                                    <h3 className="mb-2 font-medium">Müşteri Bilgileri</h3>
                                     <Card className="p-2">
                                         <div className="space-y-1">
                                             <div className="font-medium">{order.CustomerName}</div>
@@ -261,7 +236,7 @@ export const OrderDetailsScreen: React.FC = () => {
                                 {/* Delivery Address */}
                                 {order.DeliveryAddress && (
                                     <div className="space-y-1">
-                                        <h3 className="mb-2 font-medium">Delivery Address</h3>
+                                        <h3 className="mb-2 font-medium">Teslimat Adresi</h3>
                                         <Card className="p-2">
                                             <div className="space-y-1">
                                                 <div>{order.CustomerName}</div>

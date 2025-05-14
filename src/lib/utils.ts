@@ -7,6 +7,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Get initials from name and surname
+export function getInitials(name: string = "", surname: string = "") {
+  const firstInitial = name ? name.charAt(0) : "";
+  const lastInitial = surname ? surname.charAt(0) : "";
+  return (firstInitial + lastInitial).toUpperCase();
+}
+
 export function parseJwt(token: string) {
   var base64Url = token.split(".")[1];
   var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -40,8 +47,8 @@ export const formatDate = (dateString: string) => {
   try {
     const date = new Date(dateString);
 
-    if (date.getTime() === 0) return "Not yet";
-    if (date.getFullYear() === 1970) return "Not yet";
+    if (date.getTime() === 0) return "-";
+    if (date.getFullYear() === 1970) return "-";
 
     // Use UTC methods to prevent timezone conversion
     const day = String(date.getUTCDate()).padStart(2, "0");
@@ -58,7 +65,7 @@ export const formatDate = (dateString: string) => {
 
 // Format timestamp
 export const formatTimestamp = (timestamp: string) => {
-  if (timestamp === "0") return "Not yet";
+  if (timestamp === "0") return "-";
 
   const date = new Date(parseInt(timestamp) * 1000);
   return formatDate(date.toISOString());

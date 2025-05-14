@@ -1,4 +1,4 @@
-export const TSOFT_API_URL = "http://localhost:8080";
+export const TSOFT_API_URL = "https://tsoft.grispi.app";
 
 // Customer search filter types
 type FilterType = "Mobile" | "Email" | "CustomerCode" | "Name";

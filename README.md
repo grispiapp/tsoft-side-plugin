@@ -39,7 +39,6 @@ A Grispi plugin that integrates with TSoft e-commerce platform, allowing custome
    ```sh
    yarn install
    ```
-3. Create a `.env` file with your TSoft API settings (if needed)
 
 ## Development
 

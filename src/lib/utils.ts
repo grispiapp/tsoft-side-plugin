@@ -86,3 +86,22 @@ export const formatCurrency = (amount: string) => {
     return amount;
   }
 };
+
+type IframeContext = {
+  origin: string;
+  pluginId: string;
+  iframeAuth: string;
+};
+
+export const getIframeContext = (): IframeContext | null => {
+  const params = new URLSearchParams(window.location.hash.substring(1));
+  const requiredParams = ["origin", "pluginId", "iframeAuth"];
+
+  const context = Object.fromEntries(
+    requiredParams.map((param) => [param, params.get(param)])
+  );
+
+  return Object.values(context).every(Boolean)
+    ? (context as IframeContext)
+    : null;
+};

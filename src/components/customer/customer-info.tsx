@@ -1,9 +1,12 @@
-import React from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { ExternalLinkIcon } from "@radix-ui/react-icons"
 import { CustomerAvatar } from "./customer-avatar"
 import { getCustomerDetailsUrl } from "@/api/tsoft"
+import { Button } from "../ui/button"
+import { getIframeContext } from "@/lib/utils"
+import toast from "react-hot-toast"
 
 type CustomerInfoProps = {
     customer: any
@@ -18,6 +21,34 @@ export const CustomerInfo: React.FC<CustomerInfoProps> = ({
     customerId,
     className = ""
 }) => {
+    const [loading, setLoading] = useState<boolean>(false);
+
+    const sendCustomerInfoToGrispi = useCallback(() => {
+        const context = getIframeContext()
+        if (!context) return;
+
+        setLoading(true);
+
+        window.parent.postMessage({
+            ...context,
+            type: 'com.grispi.fn.updateRequester',
+            data: {
+                fullName: `${customer.Name} ${customer.Surname}`,
+                email: customer.Email,
+                phone: customer.Mobile,
+            }
+        })
+    }, [customer])
+
+    useEffect(() => {
+        if (loading) {
+            setTimeout(() => {
+                setLoading(false);
+                toast.success("Müşteri bilgileri Grispi'ye gönderildi");
+            }, 1000);
+        }
+    }, [loading]);
+
     if (!customer) return null;
 
     return (
@@ -62,6 +93,9 @@ export const CustomerInfo: React.FC<CustomerInfoProps> = ({
                         <ExternalLinkIcon className="size-3.5" />
                     </a>
                 )}
+                <Button variant="outline" className="w-full" onClick={sendCustomerInfoToGrispi} disabled={loading}>
+                    Müşteri Bilgilerini Grispi'ye Gönder
+                </Button>
             </CardContent>
         </Card>
     )

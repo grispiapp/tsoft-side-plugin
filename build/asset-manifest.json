@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/tsoft-side-plugin/build/static/css/main.0d455661.css",
-    "main.js": "/tsoft-side-plugin/build/static/js/main.567ba672.js",
+    "main.js": "/tsoft-side-plugin/build/static/js/main.c058608d.js",
     "index.html": "/tsoft-side-plugin/build/index.html",
     "main.0d455661.css.map": "/tsoft-side-plugin/build/static/css/main.0d455661.css.map",
-    "main.567ba672.js.map": "/tsoft-side-plugin/build/static/js/main.567ba672.js.map"
+    "main.c058608d.js.map": "/tsoft-side-plugin/build/static/js/main.c058608d.js.map"
   },
   "entrypoints": [
     "static/css/main.0d455661.css",
-    "static/js/main.567ba672.js"
+    "static/js/main.c058608d.js"
   ]
 }

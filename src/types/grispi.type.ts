@@ -33,3 +33,12 @@ export type JwtToken = {
   iat: number;
   jti: string;
 };
+
+export type UpdateRequesterMessage = {
+  type: "com.grispi.fn.updateRequester";
+  data: {
+    error: string | null;
+    pluginId: string;
+    ticketKey: string;
+  };
+};

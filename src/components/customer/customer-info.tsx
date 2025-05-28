@@ -7,6 +7,7 @@ import { getCustomerDetailsUrl } from "@/api/tsoft"
 import { Button } from "../ui/button"
 import { getIframeContext } from "@/lib/utils"
 import toast from "react-hot-toast"
+import { UpdateRequesterMessage } from "@/types/grispi.type"
 
 type CustomerInfoProps = {
     customer: any
@@ -25,7 +26,11 @@ export const CustomerInfo: React.FC<CustomerInfoProps> = ({
 
     const sendCustomerInfoToGrispi = useCallback(() => {
         const context = getIframeContext()
-        if (!context) return;
+
+        if (!context) {
+            toast.error("Grispi'ye bağlanılamadı");
+            return;
+        };
 
         setLoading(true);
 
@@ -37,17 +42,26 @@ export const CustomerInfo: React.FC<CustomerInfoProps> = ({
                 email: customer.Email,
                 phone: customer.Mobile,
             }
-        })
+        }, context.origin)
     }, [customer])
 
     useEffect(() => {
-        if (loading) {
-            setTimeout(() => {
+        const handleUpdateRequesterMessage = (event: MessageEvent<UpdateRequesterMessage>) => {
+            if (event.data.type === 'com.grispi.fn.updateRequester') {
                 setLoading(false);
-                toast.success("Müşteri bilgileri Grispi'ye gönderildi");
-            }, 1000);
+
+                event.data.data.error
+                    ? toast.error(event.data.data.error)
+                    : toast.success("Müşteri bilgileri Grispi'ye gönderildi");
+            }
         }
-    }, [loading]);
+
+        window.addEventListener('message', handleUpdateRequesterMessage);
+
+        return () => {
+            window.removeEventListener('message', handleUpdateRequesterMessage);
+        }
+    }, []);
 
     if (!customer) return null;
 
